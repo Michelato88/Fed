@@ -44,34 +44,6 @@
     margin: 4px 0;
     font-size: 0.95rem;
   }
-  .controls {
-    max-width: 1080px;
-    margin: 12px auto 4px;
-    padding: 16px 20px;
-    background: var(--card-bg);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px;
-    align-items: center;
-    margin-left: 20px;
-    margin-right: 20px;
-  }
-  .controls label {
-    font-size: 0.85rem;
-    color: var(--ink-soft);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .controls input[type="number"] {
-    width: 90px;
-    padding: 7px 9px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    font-size: 0.95rem;
-  }
   .note {
     font-size: 0.82rem;
     color: var(--ink-soft);
@@ -89,27 +61,45 @@
     border: 1px solid var(--line);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 18px;
+    padding: 0 0 18px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     position: relative;
     transition: outline 0.15s ease, transform 0.1s ease;
+    overflow: hidden;
   }
   .card.selected {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
+  .card.unavailable {
+    opacity: 0.72;
+  }
+  .card > .card-body {
+    padding: 0 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .thumb {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    display: block;
+    background: #e9e7e1;
+  }
   .badge {
     position: absolute;
-    top: -10px;
-    left: 16px;
-    background: var(--ink);
+    top: 10px;
+    left: 12px;
+    background: rgba(20,20,20,0.78);
     color: #fff;
     font-size: 0.78rem;
     font-weight: 600;
     padding: 3px 10px;
     border-radius: 999px;
+    z-index: 2;
   }
   .card h2 {
     font-size: 1.05rem;
@@ -283,16 +273,8 @@
 <header>
   <h1>🏡 Escolha da casa — fim de semana do Fed</h1>
   <p><strong>27 a 30 de agosto de 2026 · 3 noites</strong> (aniversário do Fed 🎉)</p>
-  <p class="note">Os preços do Airbnb mudam de acordo com o dispositivo/horário da busca, então não dá pra confiar em preço fixo. Cada card já vem com o link certo (datas 27–30/08 preenchidas) — é só abrir, ver o preço total que aparece pra você e colar aqui embaixo. A página calcula sozinha o preço por noite e por pessoa.</p>
+  <p class="note">Já preenchi os preços que o Diego encontrou (preço total pra 3 noites). As casas marcadas como indisponíveis não têm as datas 27–30/08 livres. Se quiser conferir de novo ou atualizar algum valor, cada card tem o link certo (datas já preenchidas) — é só abrir, ver o preço total e ajustar aqui. A página calcula sozinha o preço por noite.</p>
 </header>
-
-<div class="controls">
-  <label>
-    Nº de pessoas dividindo
-    <input type="number" id="peopleCount" value="8" min="1" max="30" oninput="recalcAll()">
-  </label>
-  <span class="note">Ajuste esse número pra ver o valor por pessoa em cada casa (lembrando do combinado de dividir 3/4 pra galera extra).</span>
-</div>
 
 <div class="grid" id="grid"></div>
 
@@ -319,7 +301,10 @@ const listings = [
     beds: "3 quartos · 4 camas · 2.5 banheiros",
     tags: ["Piscina aquecida", "Vista", "Gramado"],
     note: { type: "info", text: "💬 \"Achei bom! Mas confesso que fiquei com medo desse gramado descendo\" — Cami" },
-    url: "https://www.airbnb.com/rooms/53699798?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    url: "https://www.airbnb.com/rooms/53699798?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6NTM2OTk3OTg%3D/original/0f088252-d321-45f4-9446-461c2e007ccd.jpeg?im_w=720&width=720&quality=70&auto=webp",
+    price: 2970,
+    unavailable: false
   },
   {
     id: 2,
@@ -328,8 +313,11 @@ const listings = [
     rating: "4.99 (136 avaliações)",
     beds: "3 quartos · 8 camas · 2 banheiros",
     tags: ["Piscina", "Sinuca", "Churrasqueira", "Aceita pet"],
-    note: { type: "warn", text: "💬 \"Decoração duvidosa mas infra de área externa bem boa!\" — Cami" },
-    url: "https://www.airbnb.com/rooms/47785812?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    note: { type: "danger", text: "❌ Não disponível para 27–30/08." },
+    url: "https://www.airbnb.com/rooms/47785812?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/f75e0034-50f5-42f4-9112-452f9256e9fc.jpg?im_w=720",
+    price: null,
+    unavailable: true
   },
   {
     id: 3,
@@ -339,7 +327,10 @@ const listings = [
     beds: "3 quartos · 5 camas · 3 banheiros",
     tags: ["Jacuzzi/spa aquecido", "Piscina", "Lareira", "Trilhas"],
     note: { type: "info", text: "⭐ Favorita da Cami: \"a que tem mais borogodó\". Só falta confirmar com o anfitrião se a jacuzzi é mesmo quente." },
-    url: "https://www.airbnb.com/rooms/46379022?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    url: "https://www.airbnb.com/rooms/46379022?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/hosting/Hosting-46379022/original/57c34eb3-4f78-4212-a55e-3ea92e1abb75.jpeg?im_w=720&width=720&quality=70&auto=webp",
+    price: 2778,
+    unavailable: false
   },
   {
     id: 4,
@@ -349,7 +340,10 @@ const listings = [
     beds: "3 quartos · 4 camas · 4 banheiros",
     tags: ["Jacuzzi aquecida", "Lareira", "Fogueira"],
     note: { type: "danger", text: "⚠️ No grupo comentaram que essa provavelmente já foi alugada por outra pessoa — confirmar disponibilidade antes de votar." },
-    url: "https://www.airbnb.com/rooms/43728494?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    url: "https://www.airbnb.com/rooms/43728494?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/74e3e1e9-1f2c-47ed-a8fb-7c8c18f8f861.jpg?im_w=720",
+    price: null,
+    unavailable: false
   },
   {
     id: 5,
@@ -359,7 +353,10 @@ const listings = [
     beds: "3 quartos · 6 camas · 3 banheiros",
     tags: ["Piscina aquecida", "Playground", "Campo de futebol", "Aceita pet"],
     note: null,
-    url: "https://www.airbnb.com.br/rooms/1125847138669144589?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    url: "https://www.airbnb.com.br/rooms/1125847138669144589?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/miso/Hosting-1125847138669144589/original/a2f94b47-536f-45bb-a16d-cc36bfc928d6.jpeg?im_w=720&width=720&quality=70&auto=webp",
+    price: null,
+    unavailable: false
   },
   {
     id: 6,
@@ -369,7 +366,10 @@ const listings = [
     beds: "4 quartos · 5 camas · 4.5 banheiros",
     tags: ["Piscina", "Cachoeira próxima", "Academia", "Aceita pet"],
     note: { type: "warn", text: "Poucas avaliações ainda (só 3) — vale olhar as fotos com calma." },
-    url: "https://www.airbnb.com.br/rooms/1729037790268073704?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    url: "https://www.airbnb.com.br/rooms/1729037790268073704?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/hosting/Hosting-1729037790268073704/original/f95b0d30-ee91-478a-9765-437ab2459bfc.png?im_w=720",
+    price: null,
+    unavailable: false
   },
   {
     id: 7,
@@ -378,8 +378,11 @@ const listings = [
     rating: "4.98 (143 avaliações)",
     beds: "4 quartos · 11 camas · 2 banheiros (+2 externos)",
     tags: ["Piscina com bar", "Quadra esportiva", "Fogueira", "Cabe até 15"],
-    note: { type: "info", text: "A maior das opções — cabe bastante gente, perto do Outlet Catarina." },
-    url: "https://www.airbnb.com.br/rooms/50369461?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    note: { type: "danger", text: "❌ Não disponível para 27–30/08." },
+    url: "https://www.airbnb.com.br/rooms/50369461?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/hosting/Hosting-50369461/original/53d228c3-86b2-4398-bd00-69efae83ccfd.jpeg?im_w=720&width=720&quality=70&auto=webp",
+    price: null,
+    unavailable: true
   },
   {
     id: 8,
@@ -389,7 +392,10 @@ const listings = [
     beds: "4 quartos · 6 camas · 5.5 banheiros",
     tags: ["Piscina privativa", "Área externa grande", "Segurança"],
     note: null,
-    url: "https://www.airbnb.com.br/rooms/16012863?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    url: "https://www.airbnb.com.br/rooms/16012863?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/58fca7d2-f78f-4046-b43f-2a0bde9716e4.jpg?im_w=720",
+    price: 4715,
+    unavailable: false
   },
   {
     id: 9,
@@ -399,7 +405,10 @@ const listings = [
     beds: "3 quartos · 3 camas · 2.5 banheiros",
     tags: ["Spa", "Piscina", "Forno de pizza", "Home theater"],
     note: null,
-    url: "https://www.airbnb.com.br/rooms/1029705840298024460?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    url: "https://www.airbnb.com.br/rooms/1029705840298024460?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTAyOTcwNTg0MDI5ODAyNDQ2MA%3D%3D/original/7a349870-b232-4a82-aba2-d1fe2cc5e900.jpeg?im_w=720&width=720&quality=70&auto=webp",
+    price: 2692,
+    unavailable: false
   },
   {
     id: 10,
@@ -408,8 +417,11 @@ const listings = [
     rating: "4.86 (93 avaliações)",
     beds: "4 quartos · 4 camas · 4 banheiros",
     tags: ["Piscina com vista", "Lareira", "Forno de pizza", "Wi-fi de fibra"],
-    note: { type: "warn", text: "O link original que a Cami mandou era pra 11–13/09 — o botão abaixo já foi ajustado pra 27–30/08, confirme a disponibilidade nessa data." },
-    url: "https://www.airbnb.com.br/rooms/1061072869828888052?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+    note: { type: "danger", text: "❌ Não disponível para 27–30/08 (o link original era pra 11–13/09)." },
+    url: "https://www.airbnb.com.br/rooms/1061072869828888052?check_in=2026-08-27&check_out=2026-08-30&adults=1",
+    img: "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA2MTA3Mjg2OTgyODg4ODA1Mg%3D%3D/original/e0a204dc-93c8-45dc-92f7-d55f1959698e.jpeg?im_w=720&width=720&quality=70&auto=webp",
+    price: null,
+    unavailable: true
   }
 ];
 
@@ -424,68 +436,64 @@ function render() {
   grid.innerHTML = '';
   listings.forEach(item => {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'card' + (item.unavailable ? ' unavailable' : '');
     card.id = 'card-' + item.id;
 
     const noteHtml = item.note
       ? `<div class="status ${item.note.type}">${item.note.text}</div>`
       : '';
 
+    const priceValue = item.price != null ? item.price : '';
+
     card.innerHTML = `
       <span class="badge">Casa ${item.id}</span>
-      <h2>${item.name}</h2>
-      <div class="location">${item.location}</div>
-      <div class="tags">
-        <span class="tag rating">★ ${item.rating}</span>
-        <span class="tag">${item.beds}</span>
-        ${item.tags.map(t => `<span class="tag">${t}</span>`).join('')}
-      </div>
-      ${noteHtml}
-      <div class="price-row">
-        <div class="field">
-          <label for="price-${item.id}">Preço total 3 noites (R$)</label>
-          <input type="number" id="price-${item.id}" min="0" step="1" placeholder="ex: 2400" oninput="recalcCard(${item.id})">
+      <img class="thumb" src="${item.img}" alt="${item.name}" loading="lazy">
+      <div class="card-body">
+        <h2>${item.name}</h2>
+        <div class="location">${item.location}</div>
+        <div class="tags">
+          <span class="tag rating">★ ${item.rating}</span>
+          <span class="tag">${item.beds}</span>
+          ${item.tags.map(t => `<span class="tag">${t}</span>`).join('')}
         </div>
-      </div>
-      <div class="results">
-        <div class="metric">
-          <div class="label">Por noite</div>
-          <div class="value empty" id="perNight-${item.id}">—</div>
+        ${noteHtml}
+        <div class="price-row">
+          <div class="field">
+            <label for="price-${item.id}">Preço total 3 noites (R$)</label>
+            <input type="number" id="price-${item.id}" min="0" step="1" placeholder="${item.unavailable ? 'Indisponível' : 'ex: 2400'}" value="${priceValue}" ${item.unavailable ? 'disabled' : ''} oninput="recalcCard(${item.id})">
+          </div>
         </div>
-        <div class="metric">
-          <div class="label">Por pessoa (3 noites)</div>
-          <div class="value empty" id="perPerson-${item.id}">—</div>
+        <div class="results">
+          <div class="metric">
+            <div class="label">Por noite</div>
+            <div class="value empty" id="perNight-${item.id}">—</div>
+          </div>
         </div>
-      </div>
-      <div class="actions">
-        <a class="btn" href="${item.url}" target="_blank" rel="noopener">Ver no Airbnb</a>
-        <button class="btn primary" id="vote-${item.id}" onclick="selectCard(${item.id})">Escolher esta</button>
+        <div class="actions">
+          <a class="btn" href="${item.url}" target="_blank" rel="noopener">Ver no Airbnb</a>
+          <button class="btn primary" id="vote-${item.id}" onclick="selectCard(${item.id})" ${item.unavailable ? 'disabled' : ''}>Escolher esta</button>
+        </div>
       </div>
     `;
     grid.appendChild(card);
   });
+  recalcAll();
 }
 
 function recalcCard(id) {
   const priceInput = document.getElementById('price-' + id);
   const perNightEl = document.getElementById('perNight-' + id);
-  const perPersonEl = document.getElementById('perPerson-' + id);
-  const people = Math.max(1, parseInt(document.getElementById('peopleCount').value, 10) || 1);
   const total = parseFloat(priceInput.value);
 
   if (!total || total <= 0) {
     perNightEl.textContent = '—';
     perNightEl.classList.add('empty');
-    perPersonEl.textContent = '—';
-    perPersonEl.classList.add('empty');
+    updateRanking();
     return;
   }
   const perNight = total / 3;
-  const perPersonTotal = total / people;
   perNightEl.textContent = fmtBRL(perNight);
   perNightEl.classList.remove('empty');
-  perPersonEl.textContent = fmtBRL(perPersonTotal);
-  perPersonEl.classList.remove('empty');
   updateRanking();
 }
 
