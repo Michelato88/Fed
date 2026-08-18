@@ -74,7 +74,25 @@
     outline-offset: 2px;
   }
   .card.unavailable {
-    opacity: 0.72;
+    opacity: 0.5;
+    filter: grayscale(0.5);
+  }
+  .card.unavailable .thumb {
+    filter: grayscale(0.6);
+  }
+  .stamp {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: rgba(159,58,56,0.92);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    z-index: 2;
   }
   .card > .card-body {
     padding: 0 18px;
@@ -434,7 +452,8 @@ function fmtBRL(v) {
 function render() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  listings.forEach(item => {
+  const ordered = [...listings].sort((a, b) => (a.unavailable === b.unavailable) ? 0 : (a.unavailable ? 1 : -1));
+  ordered.forEach(item => {
     const card = document.createElement('div');
     card.className = 'card' + (item.unavailable ? ' unavailable' : '');
     card.id = 'card-' + item.id;
@@ -444,9 +463,11 @@ function render() {
       : '';
 
     const priceValue = item.price != null ? item.price : '';
+    const stampHtml = item.unavailable ? `<span class="stamp">Indisponível</span>` : '';
 
     card.innerHTML = `
       <span class="badge">Casa ${item.id}</span>
+      ${stampHtml}
       <img class="thumb" src="${item.img}" alt="${item.name}" loading="lazy">
       <div class="card-body">
         <h2>${item.name}</h2>
