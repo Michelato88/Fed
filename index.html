@@ -438,7 +438,8 @@ const listings = [
     url: "https://www.airbnb.com.br/rooms/1029705840298024460?check_in=2026-08-27&check_out=2026-08-30&adults=1",
     img: "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTAyOTcwNTg0MDI5ODAyNDQ2MA%3D%3D/original/7a349870-b232-4a82-aba2-d1fe2cc5e900.jpeg?im_w=720&width=720&quality=70&auto=webp",
     price: 2692,
-    unavailable: false
+    unavailable: false,
+    diego: { rank: null, comment: "Incrível, mas \"apertada\" caso alguém se jogue no rolê. Menos kids friendly (segurança de sacadas e tal)." }
   },
   {
     id: 10,
@@ -477,7 +478,7 @@ function render() {
     const priceValue = item.price != null ? item.price : '';
     const stampHtml = item.unavailable ? `<span class="stamp">Indisponível</span>` : '';
     const diegoHtml = item.diego
-      ? `<div class="diego-note">🗳️ <strong>Diego:</strong> ${item.diego.rank}${item.diego.comment ? ' — ' + item.diego.comment : ''}</div>`
+      ? `<div class="diego-note">🗳️ <strong>Diego:</strong> ${item.diego.rank ? item.diego.rank + (item.diego.comment ? ' — ' : '') : ''}${item.diego.comment || ''}</div>`
       : '';
 
     card.innerHTML = `
