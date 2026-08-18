@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Votação da Casa — 27 a 30/08</title>
+<style>
+  :root {
+    --bg: #f5f4f1;
+    --card-bg: #ffffff;
+    --ink: #24272b;
+    --ink-soft: #5b6169;
+    --line: #e4e1da;
+    --accent: #2f6f4f;
+    --accent-soft: #e8f1ec;
+    --warn: #b45309;
+    --warn-soft: #fdf1e2;
+    --danger: #9f3a38;
+    --danger-soft: #fbebea;
+    --gold: #b8860b;
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(20,20,20,0.06), 0 6px 18px rgba(20,20,20,0.05);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.45;
+    padding-bottom: 80px;
+  }
+  header {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 20px 12px;
+  }
+  header h1 {
+    font-size: 1.6rem;
+    margin: 0 0 6px;
+  }
+  header p {
+    color: var(--ink-soft);
+    margin: 4px 0;
+    font-size: 0.95rem;
+  }
+  .controls {
+    max-width: 1080px;
+    margin: 12px auto 4px;
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  .controls label {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .controls input[type="number"] {
+    width: 90px;
+    padding: 7px 9px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .note {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+  .grid {
+    max-width: 1080px;
+    margin: 20px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    transition: outline 0.15s ease, transform 0.1s ease;
+  }
+  .card.selected {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .badge {
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+  .card h2 {
+    font-size: 1.05rem;
+    margin: 6px 0 0;
+  }
+  .location {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 2px 0 4px;
+  }
+  .tag {
+    font-size: 0.74rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .tag.rating { background: #fdf3d9; color: var(--gold); }
+  .status {
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 7px 10px;
+    line-height: 1.35;
+  }
+  .status.info { background: var(--accent-soft); color: var(--accent); }
+  .status.warn { background: var(--warn-soft); color: var(--warn); }
+  .status.danger { background: var(--danger-soft); color: var(--danger); }
+  .desc {
+    font-size: 0.84rem;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .price-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    margin-top: 4px;
+  }
+  .price-row .field { flex: 1; }
+  .field label {
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .field input {
+    width: 100%;
+    padding: 8px 9px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .results {
+    margin-top: 6px;
+    padding: 10px 12px;
+    background: #faf9f7;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .results .metric { text-align: left; }
+  .results .metric .label { font-size: 0.7rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .03em; }
+  .results .metric .value { font-size: 1.05rem; font-weight: 700; color: var(--ink); }
+  .results .metric .value.empty { color: #b6b2a9; font-weight: 500; font-size: 0.85rem; }
+  .actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .btn {
+    flex: 1;
+    text-align: center;
+    padding: 9px 10px;
+    border-radius: 9px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+  }
+  .btn.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn.primary.selected {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .btn:hover { filter: brightness(0.97); }
+
+  .summary-bar {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -6px 18px rgba(20,20,20,0.06);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .summary-bar span#chosenLabel {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .summary-bar strong { color: var(--ink); }
+  .copy-btn {
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .copy-btn:disabled {
+    background: #c9c6bf;
+    cursor: not-allowed;
+  }
+  .toast {
+    position: fixed;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: var(--ink);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .ranking {
+    max-width: 1080px;
+    margin: 4px auto 0;
+    padding: 0 20px;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  footer {
+    max-width: 1080px;
+    margin: 30px auto 0;
+    padding: 0 20px;
+    font-size: 0.78rem;
+    color: #9b968c;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏡 Escolha da casa — fim de semana do Fed</h1>
+  <p><strong>27 a 30 de agosto de 2026 · 3 noites</strong> (aniversário do Fed 🎉)</p>
+  <p class="note">Os preços do Airbnb mudam de acordo com o dispositivo/horário da busca, então não dá pra confiar em preço fixo. Cada card já vem com o link certo (datas 27–30/08 preenchidas) — é só abrir, ver o preço total que aparece pra você e colar aqui embaixo. A página calcula sozinha o preço por noite e por pessoa.</p>
+</header>
+
+<div class="controls">
+  <label>
+    Nº de pessoas dividindo
+    <input type="number" id="peopleCount" value="8" min="1" max="30" oninput="recalcAll()">
+  </label>
+  <span class="note">Ajuste esse número pra ver o valor por pessoa em cada casa (lembrando do combinado de dividir 3/4 pra galera extra).</span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="ranking" id="rankingNote"></div>
+
+<footer>
+  Feito para organizar a votação do grupo. Os dados de cada casa (nome, avaliação, comodidades) foram puxados dos anúncios do Airbnb; os preços são preenchidos manualmente porque o Airbnb não mostra preço fixo por link/data pra automação.
+</footer>
+
+<div class="summary-bar">
+  <span id="chosenLabel">Nenhuma casa escolhida ainda</span>
+  <button class="copy-btn" id="copyBtn" disabled onclick="copyVote()">Copiar meu voto pro grupo</button>
+</div>
+
+<div class="toast" id="toast">Copiado! Cola no zap ✅</div>
+
+<script>
+const listings = [
+  {
+    id: 1,
+    name: "Chalet com piscina aquecida",
+    location: "São Roque, SP",
+    rating: "4.96 (83 avaliações)",
+    beds: "3 quartos · 4 camas · 2.5 banheiros",
+    tags: ["Piscina aquecida", "Vista", "Gramado"],
+    note: { type: "info", text: "💬 \"Achei bom! Mas confesso que fiquei com medo desse gramado descendo\" — Cami" },
+    url: "https://www.airbnb.com/rooms/53699798?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  },
+  {
+    id: 2,
+    name: "Rancho Mari e Clau — Rota do Vinho",
+    location: "São Roque, SP",
+    rating: "4.99 (136 avaliações)",
+    beds: "3 quartos · 8 camas · 2 banheiros",
+    tags: ["Piscina", "Sinuca", "Churrasqueira", "Aceita pet"],
+    note: { type: "warn", text: "💬 \"Decoração duvidosa mas infra de área externa bem boa!\" — Cami" },
+    url: "https://www.airbnb.com/rooms/47785812?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  },
+  {
+    id: 3,
+    name: "Cottage com spa climatizado",
+    location: "Jarinu, SP",
+    rating: "4.98 (52 avaliações)",
+    beds: "3 quartos · 5 camas · 3 banheiros",
+    tags: ["Jacuzzi/spa aquecido", "Piscina", "Lareira", "Trilhas"],
+    note: { type: "info", text: "⭐ Favorita da Cami: \"a que tem mais borogodó\". Só falta confirmar com o anfitrião se a jacuzzi é mesmo quente." },
+    url: "https://www.airbnb.com/rooms/46379022?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  },
+  {
+    id: 4,
+    name: "Casa Tajj — lareira e jacuzzi",
+    location: "São Roque, SP",
+    rating: "4.9 (188 avaliações)",
+    beds: "3 quartos · 4 camas · 4 banheiros",
+    tags: ["Jacuzzi aquecida", "Lareira", "Fogueira"],
+    note: { type: "danger", text: "⚠️ No grupo comentaram que essa provavelmente já foi alugada por outra pessoa — confirmar disponibilidade antes de votar." },
+    url: "https://www.airbnb.com/rooms/43728494?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  },
+  {
+    id: 5,
+    name: "Casa em condomínio — piscina aquecida",
+    location: "Mairinque, SP",
+    rating: "5.0 (30 avaliações)",
+    beds: "3 quartos · 6 camas · 3 banheiros",
+    tags: ["Piscina aquecida", "Playground", "Campo de futebol", "Aceita pet"],
+    note: null,
+    url: "https://www.airbnb.com.br/rooms/1125847138669144589?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  },
+  {
+    id: 6,
+    name: "Condomínio Porta do Sol — piscina e cachoeira",
+    location: "Mairinque, SP",
+    rating: "5.0 (3 avaliações)",
+    beds: "4 quartos · 5 camas · 4.5 banheiros",
+    tags: ["Piscina", "Cachoeira próxima", "Academia", "Aceita pet"],
+    note: { type: "warn", text: "Poucas avaliações ainda (só 3) — vale olhar as fotos com calma." },
+    url: "https://www.airbnb.com.br/rooms/1729037790268073704?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  },
+  {
+    id: 7,
+    name: "Chácara Recanto Amigo",
+    location: "São Roque, SP",
+    rating: "4.98 (143 avaliações)",
+    beds: "4 quartos · 11 camas · 2 banheiros (+2 externos)",
+    tags: ["Piscina com bar", "Quadra esportiva", "Fogueira", "Cabe até 15"],
+    note: { type: "info", text: "A maior das opções — cabe bastante gente, perto do Outlet Catarina." },
+    url: "https://www.airbnb.com.br/rooms/50369461?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  },
+  {
+    id: 8,
+    name: "Lugar encantador",
+    location: "Itu, SP",
+    rating: "4.96 (134 avaliações)",
+    beds: "4 quartos · 6 camas · 5.5 banheiros",
+    tags: ["Piscina privativa", "Área externa grande", "Segurança"],
+    note: null,
+    url: "https://www.airbnb.com.br/rooms/16012863?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  },
+  {
+    id: 9,
+    name: "Descanso e tranquilidade com spa",
+    location: "Cotia, SP",
+    rating: "5.0 (26 avaliações)",
+    beds: "3 quartos · 3 camas · 2.5 banheiros",
+    tags: ["Spa", "Piscina", "Forno de pizza", "Home theater"],
+    note: null,
+    url: "https://www.airbnb.com.br/rooms/1029705840298024460?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  },
+  {
+    id: 10,
+    name: "Vista maravilhosa — perto da Rota do Vinho",
+    location: "São Roque, SP",
+    rating: "4.86 (93 avaliações)",
+    beds: "4 quartos · 4 camas · 4 banheiros",
+    tags: ["Piscina com vista", "Lareira", "Forno de pizza", "Wi-fi de fibra"],
+    note: { type: "warn", text: "O link original que a Cami mandou era pra 11–13/09 — o botão abaixo já foi ajustado pra 27–30/08, confirme a disponibilidade nessa data." },
+    url: "https://www.airbnb.com.br/rooms/1061072869828888052?check_in=2026-08-27&check_out=2026-08-30&adults=1"
+  }
+];
+
+let selectedId = null;
+
+function fmtBRL(v) {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  listings.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'card-' + item.id;
+
+    const noteHtml = item.note
+      ? `<div class="status ${item.note.type}">${item.note.text}</div>`
+      : '';
+
+    card.innerHTML = `
+      <span class="badge">Casa ${item.id}</span>
+      <h2>${item.name}</h2>
+      <div class="location">${item.location}</div>
+      <div class="tags">
+        <span class="tag rating">★ ${item.rating}</span>
+        <span class="tag">${item.beds}</span>
+        ${item.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+      </div>
+      ${noteHtml}
+      <div class="price-row">
+        <div class="field">
+          <label for="price-${item.id}">Preço total 3 noites (R$)</label>
+          <input type="number" id="price-${item.id}" min="0" step="1" placeholder="ex: 2400" oninput="recalcCard(${item.id})">
+        </div>
+      </div>
+      <div class="results">
+        <div class="metric">
+          <div class="label">Por noite</div>
+          <div class="value empty" id="perNight-${item.id}">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Por pessoa (3 noites)</div>
+          <div class="value empty" id="perPerson-${item.id}">—</div>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="${item.url}" target="_blank" rel="noopener">Ver no Airbnb</a>
+        <button class="btn primary" id="vote-${item.id}" onclick="selectCard(${item.id})">Escolher esta</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function recalcCard(id) {
+  const priceInput = document.getElementById('price-' + id);
+  const perNightEl = document.getElementById('perNight-' + id);
+  const perPersonEl = document.getElementById('perPerson-' + id);
+  const people = Math.max(1, parseInt(document.getElementById('peopleCount').value, 10) || 1);
+  const total = parseFloat(priceInput.value);
+
+  if (!total || total <= 0) {
+    perNightEl.textContent = '—';
+    perNightEl.classList.add('empty');
+    perPersonEl.textContent = '—';
+    perPersonEl.classList.add('empty');
+    return;
+  }
+  const perNight = total / 3;
+  const perPersonTotal = total / people;
+  perNightEl.textContent = fmtBRL(perNight);
+  perNightEl.classList.remove('empty');
+  perPersonEl.textContent = fmtBRL(perPersonTotal);
+  perPersonEl.classList.remove('empty');
+  updateRanking();
+}
+
+function recalcAll() {
+  listings.forEach(item => recalcCard(item.id));
+}
+
+function selectCard(id) {
+  selectedId = id;
+  listings.forEach(item => {
+    const card = document.getElementById('card-' + item.id);
+    const btn = document.getElementById('vote-' + item.id);
+    if (item.id === id) {
+      card.classList.add('selected');
+      btn.textContent = '✓ Escolhida';
+      btn.classList.add('selected');
+    } else {
+      card.classList.remove('selected');
+      btn.textContent = 'Escolher esta';
+      btn.classList.remove('selected');
+    }
+  });
+  const item = listings.find(l => l.id === id);
+  document.getElementById('chosenLabel').innerHTML = `Seu voto: <strong>Casa ${item.id} — ${item.name}</strong>`;
+  document.getElementById('copyBtn').disabled = false;
+}
+
+function copyVote() {
+  if (!selectedId) return;
+  const item = listings.find(l => l.id === selectedId);
+  const priceInput = document.getElementById('price-' + item.id);
+  const total = parseFloat(priceInput.value);
+  let msg = `Meu voto: Casa ${item.id} - ${item.name} (${item.location}) 🏡`;
+  if (total > 0) {
+    msg += `\nPreço que vi: ${fmtBRL(total)} total / ${fmtBRL(total/3)} por noite`;
+  }
+  navigator.clipboard.writeText(msg).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  }).catch(() => {
+    alert(msg);
+  });
+}
+
+function updateRanking() {
+  const withPrice = listings
+    .map(item => {
+      const v = parseFloat(document.getElementById('price-' + item.id).value);
+      return { item, perNight: v > 0 ? v / 3 : null };
+    })
+    .filter(x => x.perNight !== null)
+    .sort((a, b) => a.perNight - b.perNight);
+
+  const el = document.getElementById('rankingNote');
+  if (withPrice.length === 0) {
+    el.textContent = '';
+    return;
+  }
+  const cheapest = withPrice[0];
+  el.textContent = `💡 Mais barata por noite até agora: Casa ${cheapest.item.id} — ${cheapest.item.name} (${fmtBRL(cheapest.perNight)}/noite).`;
+}
+
+render();
+</script>
+
+</body>
+</html>
