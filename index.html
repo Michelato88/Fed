@@ -151,6 +151,14 @@
   .status.info { background: var(--accent-soft); color: var(--accent); }
   .status.warn { background: var(--warn-soft); color: var(--warn); }
   .status.danger { background: var(--danger-soft); color: var(--danger); }
+  .diego-note {
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 7px 10px;
+    line-height: 1.35;
+    background: #eef0fb;
+    color: #3b3f8a;
+  }
   .desc {
     font-size: 0.84rem;
     color: var(--ink-soft);
@@ -321,7 +329,8 @@ const listings = [
     url: "https://www.airbnb.com/rooms/53699798?check_in=2026-08-27&check_out=2026-08-30&adults=1",
     img: "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6NTM2OTk3OTg%3D/original/0f088252-d321-45f4-9446-461c2e007ccd.jpeg?im_w=720&width=720&quality=70&auto=webp",
     price: 2970,
-    unavailable: false
+    unavailable: false,
+    diego: { rank: "1º/2º lugar", comment: null }
   },
   {
     id: 2,
@@ -347,7 +356,8 @@ const listings = [
     url: "https://www.airbnb.com/rooms/46379022?check_in=2026-08-27&check_out=2026-08-30&adults=1",
     img: "https://a0.muscache.com/im/pictures/hosting/Hosting-46379022/original/57c34eb3-4f78-4212-a55e-3ea92e1abb75.jpeg?im_w=720&width=720&quality=70&auto=webp",
     price: 2778,
-    unavailable: false
+    unavailable: false,
+    diego: { rank: "1º/2º lugar", comment: "Quarto inferior ao outro (Chalet), mas a jacuzzi ganha o coração." }
   },
   {
     id: 4,
@@ -373,7 +383,8 @@ const listings = [
     url: "https://www.airbnb.com.br/rooms/1125847138669144589?check_in=2026-08-27&check_out=2026-08-30&adults=1",
     img: "https://a0.muscache.com/im/pictures/miso/Hosting-1125847138669144589/original/a2f94b47-536f-45bb-a16d-cc36bfc928d6.jpeg?im_w=720&width=720&quality=70&auto=webp",
     price: null,
-    unavailable: false
+    unavailable: false,
+    diego: { rank: "Última opção", comment: "Piores quartos." }
   },
   {
     id: 6,
@@ -386,7 +397,8 @@ const listings = [
     url: "https://www.airbnb.com.br/rooms/1729037790268073704?check_in=2026-08-27&check_out=2026-08-30&adults=1",
     img: "https://a0.muscache.com/im/pictures/hosting/Hosting-1729037790268073704/original/f95b0d30-ee91-478a-9765-437ab2459bfc.png?im_w=720",
     price: null,
-    unavailable: false
+    unavailable: false,
+    diego: { rank: "Última opção (entre as disponíveis)", comment: null }
   },
   {
     id: 7,
@@ -412,7 +424,8 @@ const listings = [
     url: "https://www.airbnb.com.br/rooms/16012863?check_in=2026-08-27&check_out=2026-08-30&adults=1",
     img: "https://a0.muscache.com/im/pictures/58fca7d2-f78f-4046-b43f-2a0bde9716e4.jpg?im_w=720",
     price: 4715,
-    unavailable: false
+    unavailable: false,
+    diego: { rank: "3º lugar", comment: "Tá cara." }
   },
   {
     id: 9,
@@ -463,6 +476,9 @@ function render() {
 
     const priceValue = item.price != null ? item.price : '';
     const stampHtml = item.unavailable ? `<span class="stamp">Indisponível</span>` : '';
+    const diegoHtml = item.diego
+      ? `<div class="diego-note">🗳️ <strong>Diego:</strong> ${item.diego.rank}${item.diego.comment ? ' — ' + item.diego.comment : ''}</div>`
+      : '';
 
     card.innerHTML = `
       <span class="badge">Casa ${item.id}</span>
@@ -477,6 +493,7 @@ function render() {
           ${item.tags.map(t => `<span class="tag">${t}</span>`).join('')}
         </div>
         ${noteHtml}
+        ${diegoHtml}
         <div class="price-row">
           <div class="field">
             <label for="price-${item.id}">Preço total 3 noites (R$)</label>
